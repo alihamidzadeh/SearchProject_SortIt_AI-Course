@@ -41,3 +41,23 @@ class Search:
                         return Solution(c, prb, start_time)
                     queue.append(c)
         return None
+
+    @staticmethod
+    def ucs(prb: Problem) -> Solution:
+        start_time = datetime.now()
+        queue = []
+        explored = []
+        state = prb.initState
+        queue.append(state)
+        while len(queue) > 0:
+            queue.sort(key=lambda state: state.g_n)
+            state = queue.pop(0)
+            neighbors = prb.successor(state)
+            for c in neighbors:
+                if c.__hash__() not in explored:
+                    explored.append(c.__hash__())
+                    if prb.is_goal(c):
+                        return Solution(c, prb, start_time)
+                    queue.append(c)
+
+        return None

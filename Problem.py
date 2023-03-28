@@ -28,7 +28,8 @@ class Problem:
                 if i == j:
                     continue
                 if not state.pipes[j].is_full() and not state.pipes[i].is_empty():
-                    s = State(copy.deepcopy(state.pipes), state, self.get_cost_from_change(state, i), (i, j))
+                    s = State(copy.deepcopy(state.pipes), state, self.get_cost_from_change_OnlyForUCS(state, i, j),
+                              (i, j))
                     s.change_between_two_pipe(i, j)
                     child.append(s)
         return child
@@ -55,6 +56,16 @@ class Problem:
             return state.g_n + self.path_cost[2]
         elif state.pipes[pipe_src_ind].stack[-1] == 'yellow':
             return state.g_n + self.path_cost[3]
+
+    def get_cost_from_change_OnlyForUCS(self, state: State, pipe_src_ind: int, pipe_dest_ind: int) -> int:
+        if state.pipes[pipe_src_ind].stack[-1] == 'red':
+            return state.g_n + abs(pipe_src_ind - pipe_dest_ind)
+        elif state.pipes[pipe_src_ind].stack[-1] == 'blue':
+            return state.g_n + abs(pipe_src_ind - pipe_dest_ind)
+        elif state.pipes[pipe_src_ind].stack[-1] == 'green':
+            return state.g_n + abs(pipe_src_ind - pipe_dest_ind)
+        elif state.pipes[pipe_src_ind].stack[-1] == 'yellow':
+            return state.g_n + abs(pipe_src_ind - pipe_dest_ind)
 
     def set_path_cost(self, cost: list):
         self.path_cost = cost
