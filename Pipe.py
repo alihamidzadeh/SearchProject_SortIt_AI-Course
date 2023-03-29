@@ -46,3 +46,21 @@ class Pipe:
         for i in self.stack:
             hash_string += str(i)
         return hash_string
+
+    def get_pipe_score(self):
+        score = 0
+        if self.is_empty():
+            return score
+        else:
+            if self.is_one_color():
+                score = len(self.stack)
+            else:
+                buttom_color = self.stack[0]
+                score += 1
+                for i in range(1, len(self.stack)):
+                    if buttom_color == self.stack[i]:
+                        score += 1
+                    else:
+                        score = score - (len(self.stack) - score)
+                        break
+            return score

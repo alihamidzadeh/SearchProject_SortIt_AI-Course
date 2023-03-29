@@ -18,3 +18,9 @@ class State:
         for i in hash_strings:
             hash_string += i + '###'
         return hash_string
+
+    def h_n(self):
+        sumScores = 0
+        for pipe in self.pipes:
+            sumScores -= pipe.get_pipe_score()
+        return sumScores

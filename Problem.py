@@ -28,6 +28,19 @@ class Problem:
                 if i == j:
                     continue
                 if not state.pipes[j].is_full() and not state.pipes[i].is_empty():
+                    s = State(copy.deepcopy(state.pipes), state, self.get_cost_from_change(state, i),
+                              (i, j))
+                    s.change_between_two_pipe(i, j)
+                    child.append(s)
+        return child
+
+    def successor2(self, state: State) -> list:
+        child = []
+        for i in range(len(state.pipes)):
+            for j in range(len(state.pipes)):
+                if i == j:
+                    continue
+                if not state.pipes[j].is_full() and not state.pipes[i].is_empty():
                     s = State(copy.deepcopy(state.pipes), state, self.get_cost_from_change_OnlyForUCS(state, i, j),
                               (i, j))
                     s.change_between_two_pipe(i, j)
