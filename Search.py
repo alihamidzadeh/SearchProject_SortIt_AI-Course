@@ -150,37 +150,6 @@ class Search:
             else:
                 return result
 
-    @staticmethod
-    def rbfs(prb: Problem) -> Solution:
-        start_time = datetime.now()
-        fringe = [prb.initState]
-        checkNotRpt = {}
-        while len(fringe) > 0:
-            fringe.sort(key=lambda state: state.g_n + state.h_n())
-            state = fringe.pop(0)
-            if len(fringe) != 0:
-                state2 = fringe[0]
-                state2_fn = state2.h_n() + state2.g_n
-            else:
-                state2 = copy.deepcopy(state)
-                state2_fn = 9999999
-            children = prb.successor(state)
-            checkNotRpt[state.__hash__()] = state
-            children.sort(key=lambda state: state.g_n + state.h_n())
-            limit = children[0]
-            # limit = min(children, key=lambda state: state.g_n + state.h_n())
-            limit_fn = limit.g_n + limit.h_n()
-            if limit_fn < state2_fn:
-                state2 = limit
-                for c in children:
-                    if c.__hash__() not in checkNotRpt:
-                        checkNotRpt[c.__hash__()] = c
-                        if prb.is_goal(c):
-                            return Solution(c, prb, start_time)
-                        fringe.append(c)
-        return None
-
-
     @staticmethod  # extra score =)))))))
     def bds(prb: Problem) -> Solution:
         goal_state = None
@@ -216,29 +185,27 @@ class Search:
 
         return None
 
-    staticmethod
-
-    def rbfss(prb: Problem) -> Solution:
+    @staticmethod
+    def rbfs(prb: Problem) -> Solution:
         start_time = datetime.now()
         fringe = [prb.initState]
         checkNotRpt = {}
-        state = prb.initState
         while len(fringe) > 0:
             fringe.sort(key=lambda state: state.g_n + state.h_n())
-            state = fringe[0]
-            state2 = copy.deepcopy(state)
-            state2_g_n = 9999999
-            if len(fringe) >= 2:
-                state2 = fringe[1]
-
+            state = fringe.pop(0)
+            if len(fringe) != 0:
+                state2 = fringe[0]
+                state2_fn = state2.h_n() + state2.g_n
+            else:
+                state2 = copy.deepcopy(state)
+                state2_fn = 9999999
             children = prb.successor(state)
-            fringe.pop()  # TODO
             checkNotRpt[state.__hash__()] = state
-            # children.sort(key=lambda state: state.g_n + state.h_n())
-            # limit = children[0]
-            limit = min(children, key=lambda state: state.g_n + state.h_n())
+            children.sort(key=lambda state: state.g_n + state.h_n())
+            limit = children[0]
+            # limit = min(children, key=lambda state: state.g_n + state.h_n())
             limit_fn = limit.g_n + limit.h_n()
-            if limit_fn < state2.g_n + state2.h_n():
+            if limit_fn < state2_fn:
                 state2 = limit
                 for c in children:
                     if c.__hash__() not in checkNotRpt:
@@ -247,3 +214,40 @@ class Search:
                             return Solution(c, prb, start_time)
                         fringe.append(c)
         return None
+
+    @staticmethod
+    def rbfs2(prb: Problem) -> Solution:
+        start_time = datetime.now()
+        state = prb.initState
+        solution, res = Search.rbfs_search(prb, state, 9999999, start_time)
+        if res == 1 and solution is not None:
+            return solution
+        else:
+            return None
+
+    @staticmethod
+    def rbfs_search(prb: Problem, statee, limit: int, start_time) -> Solution:
+        state = statee
+        children = prb.successor(state)
+        # if prb.is_goal(state):
+        #     return Solution(state, prb, start_time), 1
+
+        for c in children:
+            if (c.g_n + c.h_n() < state.g_n + state.h_n()):
+                c.g_n = state.g_n + state.h_n()
+
+        children.sort(key=lambda state: state.g_n + state.h_n())
+        children.reverse()
+        current = children.pop()
+
+        res = None
+        if current.g_n < limit:
+            current2 = children.pop()
+            if current2.g_n > limit:
+                res, current.g_n = Search.rbfs_search(prb, current, limit, start_time)
+            else:
+                res, current.g_n = Search.rbfs_search(prb, current, current2.g_n, start_time)
+            if res != None:
+                return res, 1
+        else:
+            return None, current.g_n
