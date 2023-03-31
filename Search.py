@@ -1,3 +1,5 @@
+import copy
+
 from Solution import Solution
 from Problem import Problem
 from datetime import datetime
@@ -150,56 +152,44 @@ class Search:
 
     @staticmethod
     def rbfs(prb: Problem) -> Solution:
-        print()
+        start_time = datetime.now()
+        fringe = [prb.initState]
+        checkNotRpt = {}
+        while len(fringe) > 0:
+            fringe.sort(key=lambda state: state.g_n + state.h_n())
+            state = fringe.pop(0)
+            if len(fringe) != 0:
+                state2 = fringe[0]
+                state2_fn = state2.h_n() + state2.g_n
+            else:
+                state2 = copy.deepcopy(state)
+                state2_fn = 9999999
+            children = prb.successor(state)
+            checkNotRpt[state.__hash__()] = state
+            children.sort(key=lambda state: state.g_n + state.h_n())
+            limit = children[0]
+            # limit = min(children, key=lambda state: state.g_n + state.h_n())
+            limit_fn = limit.g_n + limit.h_n()
+            if limit_fn < state2_fn:
+                state2 = limit
+                for c in children:
+                    if c.__hash__() not in checkNotRpt:
+                        checkNotRpt[c.__hash__()] = c
+                        if prb.is_goal(c):
+                            return Solution(c, prb, start_time)
+                        fringe.append(c)
+        return None
 
-        # start_time = datetime.now()
-        # fringe = []
-        # arr = []  # not expanded nodes
-        # checkNotRpt = {}
-        # state = prb.initState
-        # fringe.append(state)
-        # cut_off = 99999999
-        # cut_off_state = prb.initState
-        #
-        # current = state.h_n() + state.g_n
-        # while len(fringe) > 0:
-        #     state = fringe.pop()
-        #
-        #     checkNotRpt[state.__hash__()] = state
-        #     children = prb.successor(state)
-        #
-        #     min = cut_off
-        #     min_state = None
-        #     for c in children:
-        #         if min > c.g_n + c.h_n:
-        #             min = c.g_n + c.h_n
-        #             min_state = c
-        #     cut_off = min
-        #     cut_off_state = min_state
-        #
-        #     for c in children:
-        #         if (c.__hash__() not in checkNotRpt) and (current <= cut_off):
-        #             checkNotRpt[c.__hash__()] = c
-        #             if prb.is_goal(c):
-        #                 return Solution(c, prb, start_time)
-        #             fringe.append(c)
-        #
-        #         elif (c.__hash__() not in checkNotRpt) and (current > cut_off):
-        #
-        # return None
-
-    @staticmethod
-    def rbfs_search(node, cut_off):
-        print()
 
     @staticmethod  # extra score =)))))))
     def bds(prb: Problem) -> Solution:
-        start_time = datetime.now()
         goal_state = None
         goal_solution = Search.bfs(prb)  # used BFS Method for get goal state and backwarding
+
+        start_time = datetime.now()
         goal_state = goal_solution.state
-        arr1 = {}
-        arr2 = {}
+        checkNotRpt_forward_children = {}  # Filter same states for forward_children
+        checkNotRpt_backward_children = {}  # Filter same states for backward_children
         if goal_state is not None:
             fringe = []
             fringe2 = []
@@ -212,11 +202,11 @@ class Search:
                 backward_children = prb.successor(fringe2.pop())
 
                 for c1 in forward_children:
-                    if c1.__hash__() not in arr1:
-                        arr1[c1.__hash__()] = c1
+                    if c1.__hash__() not in checkNotRpt_forward_children:
+                        checkNotRpt_forward_children[c1.__hash__()] = c1
                         for c2 in backward_children:
-                            if c2.__hash__() not in arr2:
-                                arr2[c2.__hash__()] = state
+                            if c2.__hash__() not in checkNotRpt_backward_children:
+                                checkNotRpt_backward_children[c2.__hash__()] = state
                                 if c1.__hash__() == c2.__hash__():
                                     print(c2.__hash__())
                                     print('DooooOOOOne!')
@@ -224,4 +214,36 @@ class Search:
                                 fringe2.append(c2)
                         fringe.append(c1)
 
+        return None
+
+    staticmethod
+
+    def rbfss(prb: Problem) -> Solution:
+        start_time = datetime.now()
+        fringe = [prb.initState]
+        checkNotRpt = {}
+        state = prb.initState
+        while len(fringe) > 0:
+            fringe.sort(key=lambda state: state.g_n + state.h_n())
+            state = fringe[0]
+            state2 = copy.deepcopy(state)
+            state2_g_n = 9999999
+            if len(fringe) >= 2:
+                state2 = fringe[1]
+
+            children = prb.successor(state)
+            fringe.pop()  # TODO
+            checkNotRpt[state.__hash__()] = state
+            # children.sort(key=lambda state: state.g_n + state.h_n())
+            # limit = children[0]
+            limit = min(children, key=lambda state: state.g_n + state.h_n())
+            limit_fn = limit.g_n + limit.h_n()
+            if limit_fn < state2.g_n + state2.h_n():
+                state2 = limit
+                for c in children:
+                    if c.__hash__() not in checkNotRpt:
+                        checkNotRpt[c.__hash__()] = c
+                        if prb.is_goal(c):
+                            return Solution(c, prb, start_time)
+                        fringe.append(c)
         return None
