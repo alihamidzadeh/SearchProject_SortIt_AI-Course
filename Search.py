@@ -191,3 +191,37 @@ class Search:
     @staticmethod
     def rbfs_search(node, cut_off):
         print()
+
+    @staticmethod  # extra score =)))))))
+    def bds(prb: Problem) -> Solution:
+        start_time = datetime.now()
+        goal_state = None
+        goal_solution = Search.bfs(prb)  # used BFS Method for get goal state and backwarding
+        goal_state = goal_solution.state
+        arr1 = {}
+        arr2 = {}
+        if goal_state is not None:
+            fringe = []
+            fringe2 = []
+            state = prb.initState
+            fringe.append(state)
+            fringe2.append(goal_state)
+
+            while len(fringe) > 0 and len(fringe2) > 0:
+                forward_children = prb.successor(fringe.pop())
+                backward_children = prb.successor(fringe2.pop())
+
+                for c1 in forward_children:
+                    if c1.__hash__() not in arr1:
+                        arr1[c1.__hash__()] = c1
+                        for c2 in backward_children:
+                            if c2.__hash__() not in arr2:
+                                arr2[c2.__hash__()] = state
+                                if c1.__hash__() == c2.__hash__():
+                                    print(c2.__hash__())
+                                    print('DooooOOOOne!')
+                                    return Solution(goal_state, prb, start_time)
+                                fringe2.append(c2)
+                        fringe.append(c1)
+
+        return None
